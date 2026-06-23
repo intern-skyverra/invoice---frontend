@@ -24,6 +24,11 @@ from backend.database.customers_db import (
     get_customer_names
 )
 
+from backend.database.inventory_db import (
+    reduce_stock,
+    get_pending_stock
+)
+
 
 class InvoicePage(QWidget):
 
@@ -287,6 +292,31 @@ class InvoicePage(QWidget):
                         qty.text()
                     )
 
+                    available_stock = get_pending_stock(
+                        product.text()
+                    )
+
+                    if available_stock is None:
+
+                        QMessageBox.warning(
+                            self,
+                            "Stock Error",
+                            f"{product.text()} not found in inventory"
+                        )
+
+                        return
+
+                    if qty_value > available_stock:
+
+                        QMessageBox.warning(
+                            self,
+                            "Stock Error",
+                            f"{product.text()} has only "
+                            f"{available_stock} items available"
+                        )
+
+                        return
+
                     rate_value = float(
                         rate.text()
                     )
@@ -439,6 +469,13 @@ class InvoicePage(QWidget):
 
         conn.commit()
         conn.close()
+
+        for item in items:
+
+            reduce_stock(
+                item["product"],
+                int(float(item["qty"]))
+            )
 
         QMessageBox.information(
             self,

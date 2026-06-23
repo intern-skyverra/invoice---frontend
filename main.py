@@ -226,6 +226,10 @@ class MainWindow(QMainWindow):
 
     def change_page(self, index):
 
+        # Refresh Inventory Page
+        if index == 3:
+            self.inventory_page.load_inventory()
+
         self.stack.setCurrentIndex(index)
 
         normal_style = """
